@@ -1,0 +1,90 @@
+﻿# Mp3tag Tag Source for DLsite Voice （simoon）
+#
+# Search by RJ Code
+#
+# This file needs to be stored in Mp3tag's tag sources directory. 
+# Put this in %APPDATA%\Mp3tag\data\sources
+#
+# #####################################################################
+
+[Name]=DLsite
+[BasedOn]=https://www.dlsite.com/
+[IndexUrl]=https://www.dlsite.com/maniax/work/=/product_id/%s.html
+[AlbumUrl]=https://www.dlsite.com/maniax/work/=/product_id
+[WordSeperator]=+
+[IndexFormat]=%_url%|
+[SearchBy]=RJ||$regexp(%_folderpath%,'.*([R|r][j|J]\d{6}).*',$1)||%s
+[UserAgent]=1
+[Encoding]=url-utf-8
+
+[ParserScriptIndex]=...
+####################################################################
+#        I  N  D  E  X
+####################################################################
+
+Debug "on" "F:\\Home\\Mp3Tag\\debug.htm"
+
+sayoutput "CurrentUrl"
+say "|"
+
+[ParserScriptAlbum]=...
+# ###################################################################
+#					A  L  B  U  M
+# ###################################################################
+
+Debug "on" "F:\\Home\\Mp3Tag\\debug2.htm"
+
+#outputto "Title"
+#say %_filename%
+
+outputto "Album"
+FindLine "<h1 itemprop=\"name\" id=\"work_name\">"
+JoinUntil "</h1>"
+sayregexp "(?<=url\">)[\w\W]+(?=<\/a>)" ""
+
+outputto "Coverurl"
+FindLine "class=\"slider_item active\""
+say "https:"
+sayregexp "(?<=src=\")[\w\W]+(?=\" width)"
+
+outputto "Composer"
+FindLine "<span itemprop=\"brand\" class=\"maker_name\">"
+JoinUntil "</a>"
+sayregexp "(?<=html\">).*?(?=<\/a>)"
+
+outputto "ALBUMARTIST"
+sayoutput "Composer"
+
+outputto "Year"
+FindLine "<th>販売日</th>"
+JoinUntil "</td>"
+RegexpReplace "[年|月]" "-"
+Replace "日" ""
+sayregexp "(?<=\">)[\w\W]+(?=<\/a>)" ""
+
+# Artist
+outputto "Artist"
+FindLine "<th>声優</th>"
+JoinUntil "</tr>"
+sayregexp "(?<= >).*?(?=<\/a>)" ", "
+
+# Genre
+outputto "Genre"
+FindLine "<th>年齢指定</th>"
+sayregexp "(?<=title=\").*?(?=\")"
+
+IfOutput "Genre"
+    set "Genre"
+    say "成人向け音声作品"
+Else
+    set "Genre"
+    say "全年齢"
+EndIf
+
+# Comment
+outputto "Comment"
+FindLine "<div class=\"main_genre\">"
+JoinUntil "</div>"
+sayregexp "(?<=\.genre\">).*?(?=<\/a>)" ", "
+
+
